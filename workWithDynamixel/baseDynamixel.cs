@@ -1,92 +1,128 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Reflection.Emit;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 using dynamixel_sdk;
 
 namespace workWithDynamixel
 {
     internal class baseDynamixel
     {
-        public string com_port = "";
-        public int gotBaudrate = 0;
-        public void saver()
-        {
-            int port_num = dynamixel.portHandler("COM6");
-            dynamixel.packetHandler();
-            dynamixel.openPort(port_num);
-            dynamixel.setBaudRate(port_num, 57600);
-            dynamixel.closePort(port_num);
-        }
+        public List<int> listOfIds = new List<int>();
+        public List<string> listOfNames = new List<string>();
+        protected Form1 gotForm;
 
-        public async Task<List<int>> findDynamixel(string comPort, int baudrate)
+        public baseDynamixel(Form1 form)
         {
-            if (baudrate < 1) return null;
-            List<int> list = new List<int>();
+            gotForm = form;
+        }
+        public baseDynamixel () { }
+
+        public async Task findDynamixel(string comPort, int baudrate, int len)
+        {
+            if(listOfIds.Count > 0)
+            {
+                dynamixel.closePort(storage.openedPort);
+            }
+            listOfNames.Clear();
+            listOfIds.Clear();
+            if (baudrate < 1) return;
             await Task.Run(() =>
             {
-                int port_num = dynamixel.portHandler(comPort);
-                dynamixel.packetHandler();
                 try
                 {
+                    int port_num = dynamixel.portHandler(comPort);
+                    dynamixel.packetHandler();
+                    dynamixel.clearPort(port_num);
                     dynamixel.openPort(port_num);
                     dynamixel.setBaudRate(port_num, baudrate);
-                    for (byte i = 1; i <= 100; i++)
+                    for (byte i = 1; i <= len; i++)
                     {
                         int value = dynamixel.read1ByteTxRx(port_num, 1, i, 3);
                         if (value != 0)
                         {
-                            list.Add(value);
+                            listOfIds.Add(value);
+                            int baseId = dynamixel.read1ByteTxRx(port_num, 1, i, 0);
+                            listOfNames.Add(Enum.GetName(typeof(BaseReg), baseId));
                         }
                     }
-                    if(list.Count > 0)
+                    if(listOfIds.Count > 0)
                     {
-                        com_port = comPort;
-                        gotBaudrate = baudrate;
-
+                        storage.openedPort = port_num;
+                        storage.com_port = comPort;
+                        storage.gotBaudrate = baudrate;
                     }
-                    dynamixel.closePort(port_num);
+                    else
+                    {
+                        dynamixel.closePort(port_num);
+                    }
                 }
                 catch (Exception ex)
                 {
                     Console.WriteLine(ex.Message);
                 }
             });
+        }
+
+        public async Task resetIds()
+        {
+            await Task.Run(() =>
+            {
+                for (byte i = 1; i < 255; i++)
+                {
+                    int baseId = dynamixel.read1ByteTxRx(storage.openedPort, 1, i, 0);
+                    if (baseId != 0)
+                    { 
+                        dynamixel.write1ByteTxRx(storage.openedPort, 1, i, 3, (byte)baseId);
+                    }
+                }
+                MessageBox.Show("Выполнено");
+            });
+        }
+
+        public Dictionary<int, int> getReg(object data)
+        {
+            var gotData = (dataStruct)data;
+            Dictionary<int, int> list = new Dictionary<int, int>();
+            try
+            {
+                for (int i = 0; i < gotData.regToRead.Count; i++)
+                {
+                    switch (gotData.lengOfReg[i])
+                    {
+                        case 1:
+                            list.Add(gotData.regToRead[i], dynamixel.read1ByteTxRx(storage.openedPort, 1, (byte)gotData.id, (ushort)gotData.regToRead[i]));
+                            break;
+                        case 2:
+                            list.Add(gotData.regToRead[i], dynamixel.read2ByteTxRx(storage.openedPort, 1, (byte)gotData.id, (ushort)gotData.regToRead[i]));
+                            break;
+                    }
+                    
+                }
+                return list;
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+            }
             return list;
         }
 
-        public async Task<Dictionary<int,int>> getReg(int id, List<int> regId, List<int> regLen)
+        public void writeReg(int id, int reg, int value)
         {
-            Dictionary<int, int> list = new Dictionary<int,int>();
-            await Task.Run(() =>
+            try
             {
-                int port_num = dynamixel.portHandler(com_port);
-                dynamixel.packetHandler();
-                try
-                {
-                    dynamixel.openPort(port_num);
-                    dynamixel.setBaudRate(port_num, gotBaudrate);
-                    for(int i = 1; i < regId.Count; i++)
-                    {
-                        switch (regLen[i])
-                        {
-                            case 1:
-                                list.Add(regId[id], dynamixel.read1ByteTxRx(port_num, 1, (byte)id, (ushort)regId[i]));
-                                break;
-                            case 2:
-                                list.Add(regId[id], dynamixel.read2ByteTxRx(port_num, 1, (byte)id, (ushort)regId[i]));
-                                break;
-                        }
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine(ex.Message);
-                }
-            });
-            return list;
+                dynamixel.write1ByteTxRx(storage.openedPort, 1, (byte)id, (ushort)reg,(byte)value);
+            }
+            catch
+            {
+                return;
+            }
         }
     }
 }

@@ -2,7 +2,10 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
+using System.Windows.Forms;
+using System.Windows.Forms.VisualStyles;
 using System.Xml.Schema;
 
 namespace workWithDynamixel
@@ -10,67 +13,56 @@ namespace workWithDynamixel
     //цепочка обязанностей
     internal abstract class PeripheryBase
     {
-        protected baseDynamixel dyn = new baseDynamixel();
         public Dictionary<int, int> registers = new Dictionary<int, int>();
-        public abstract void getRegistersById(int id);
-        //public abstract Dictionary<int, int> getRegistersByType(string type);
+        protected Dictionary<int, int> gotData = new Dictionary<int, int>();
+        protected baseDynamixel dyn = new baseDynamixel();
+        protected int gotId = 0;
+        protected bool firstDraw = true;
+        protected object locker = new object();
+        public abstract void getRegistersById(int id, Form1 form, CancellationToken token, ManualResetEvent pause);
+        public abstract void testDevice();
+        public abstract bool needThreadPause();
 
         protected List<int> regToRead = new List<int>();
         protected List<int> lengOfReg = new List<int>();
         protected void getRegData(string type)
         {
-            for(int i = 1; i < 23; i++)
+            for(int i = 0; i <= 23; i++)
             {
                 regToRead.Add(i);
                 lengOfReg.Add(1);
             }
             switch (type)
             {
-                case "AR_BUTTON":
-                    for(int i = 24; i < 50; i++)
-                    {
-                        regToRead.Add(i);
-                        lengOfReg.Add(1);
-                    }
-                    break;
                 case "AR_TEMP":
                     for(int i = 24; i < 50; i++)
                     {
                         switch (i)
                         {
                             case 26:
-                                regToRead.Add(i);
-                                lengOfReg.Add(2);
-                                i++;
-                                break;
+                                regToRead.Add(i); lengOfReg.Add(2); i++; break;
                             default:
-                                regToRead.Add(i);
-                                lengOfReg.Add(1);
-                                break;
+                                regToRead.Add(i); lengOfReg.Add(1); break;
                         }
-                        
+                    }
+                    break;
+                default:
+                    for (int i = 24; i < 50; i++)
+                    {
+                        regToRead.Add(i);
+                        lengOfReg.Add(1);
                     }
                     break;
             }
         }
     }
 
-    internal class AR_LED : PeripheryBase
+    internal class dataStruct
     {
-
-        public override void getRegistersById(int id)
-        {
-            //return registers;
-        }
-    }
-
-    internal class AR_BUTTON : PeripheryBase
-    {
-
-        public async override void getRegistersById(int id)
-        {
-            getRegData("AR_BUTTON");
-            registers =  await dyn.getReg(id, regToRead, lengOfReg);
-        }
+        public Dictionary<int, int> prop1 { get; set; }
+        public int id { get; set; }
+        public List<int> regToRead { get; set; }
+        public List<int> lengOfReg { get; set; }
+        public Dictionary<int, int> result { get; set; }
     }
 }
