@@ -70,10 +70,15 @@
       <DependentUpon>Form1.cs</DependentUpon>
     </Compile>
     <Compile Include="PeripheryBase.cs" />
+    <Compile Include="Periphery\AR_BALL.cs" />
     <Compile Include="Periphery\AR_BUTTON.cs" />
+    <Compile Include="Periphery\AR_BUZZER.cs" />
     <Compile Include="Periphery\AR_LED.cs" />
+    <Compile Include="Periphery\AR_LIGHT.cs" />
+    <Compile Include="Periphery\AR_POT.cs" />
     <Compile Include="Periphery\AR_RGB.cs" />
     <Compile Include="Periphery\AR_TEMP.cs" />
+    <Compile Include="Periphery\template.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="storage.cs" />

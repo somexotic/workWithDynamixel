@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.IO.Ports;
 using System.Threading;
+using System.Runtime.InteropServices;
 
 namespace workWithDynamixel
 {
@@ -18,6 +19,7 @@ namespace workWithDynamixel
         PeripheryBase gotClass = null;
         storage store = new storage();
         public static Thread lastThread = null;
+        protected bool gotClick = false;
         public static CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
         protected static CancellationToken cancellationToken = cancellationTokenSource.Token;
         protected ManualResetEvent pause = new ManualResetEvent(true);
@@ -73,6 +75,11 @@ namespace workWithDynamixel
 
         private void listBox1_SelectedIndexChanged(object sender, EventArgs e)
         {
+            MouseEventArgs mouseEvent = e as MouseEventArgs;
+            if (!gotClick) return;
+            dataGridView1.Visible = true;
+            if (listBox1.SelectedItem == null) return;
+            storage.listBoxLastIndex = listBox1.SelectedIndex;
             string selected = listBox1.SelectedItem.ToString();
             string[] idStr = selected.Split(' ');
             string[] getName = selected.Split(':');
@@ -80,17 +87,14 @@ namespace workWithDynamixel
             storage.lastId = gotId;
             try
             {
-                if (lastThread != null)
-                {
-                    cancellationTokenSource.Cancel();
-                    Thread.Sleep(200);
-                    cancellationTokenSource = new CancellationTokenSource();
-                    cancellationToken = cancellationTokenSource.Token;
-                }
+                cancellationTokenSource.Cancel();
+                Thread.Sleep(200);
+                cancellationTokenSource = new CancellationTokenSource();
+                cancellationToken = cancellationTokenSource.Token;
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex);
+                Console.WriteLine(ex.Message);
             }
             gotClass = store.getClass(getName[0].ToString(), gotId, this);
             Thread read = new Thread(() => gotClass.getRegistersById(gotId, this, cancellationTokenSource.Token, pause));
@@ -98,6 +102,8 @@ namespace workWithDynamixel
             read.Start();
             panel1.Visible = true;
             testPanel.Visible = true;
+            panel2.Visible = true;
+            gotClick = false;
         }
 
         private void Form1_FormClosing(object sender, FormClosingEventArgs e)
@@ -111,10 +117,23 @@ namespace workWithDynamixel
         {
             if (regToWrite.Text == "" || Int32.Parse(regToWrite.Text) < 1) return;
             if (valueToWrite.Text == "" || Int32.Parse(valueToWrite.Text) < -1) return;
+            if (byteSize.Text == "" || Int32.Parse(byteSize.Text) < 1 ) return;
+            int byteSizeValue = Int32.Parse(byteSize.Text);
+            if (byteSizeValue < 1 || byteSizeValue > 2) return;
             if (pause.Reset())
             {
                 Thread.Sleep(250);
-                dyn.writeReg(storage.lastId, Int32.Parse(regToWrite.Text), Int32.Parse(valueToWrite.Text));
+                dyn.writeReg(storage.lastId, Int32.Parse(regToWrite.Text), Int32.Parse(valueToWrite.Text), byteSizeValue);
+            }
+            if (Int32.Parse(regToWrite.Text) == 3)
+            {
+                storage.lastId = Int32.Parse(valueToWrite.Text);
+                gotClass.gotId = Int32.Parse(valueToWrite.Text);
+                string newStr = "";
+                string[] str = listBox1.Items[storage.listBoxLastIndex].ToString().Split(' ');
+                newStr += str[0] + " " + valueToWrite.Text;
+                listBox1.Items[storage.listBoxLastIndex] = newStr;
+
             }
             pause.Set();
         }
@@ -141,6 +160,7 @@ namespace workWithDynamixel
             if (lastThread != null)
             {
                 pause.Reset();
+                Thread.Sleep(200);
                 await dyn.resetIds();
                 pause.Set();
             }
@@ -152,7 +172,20 @@ namespace workWithDynamixel
 
         private void dataGridView1_CellClick(object sender, DataGridViewCellEventArgs e)
         {
-            regToWrite.Text = e.RowIndex.ToString();
+            regToWrite.Text = dataGridView1.Rows[e.RowIndex].Cells[0].Value.ToString();
+
+        }
+
+        private void listBox1_MouseDown(object sender, MouseEventArgs e)
+        {
+            if(e.Button == MouseButtons.Left)
+            {
+                gotClick = true;
+            }
+            else
+            {
+                gotClick = false;
+            }
         }
     }
 }

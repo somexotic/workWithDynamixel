@@ -34,20 +34,20 @@ namespace workWithDynamixel
 
         public override void testDevice()
         {
-            dyn.writeReg(gotId, 26, 255);
+            dyn.writeReg(gotId, 26, 255, 1);
             MessageBox.Show("Зеленый светодиод должен загореться");
             Thread.Sleep(200);
-            dyn.writeReg(gotId, 26, 0);
+            dyn.writeReg(gotId, 26, 0, 1);
             Thread.Sleep(200);
-            dyn.writeReg(gotId, 27, 255);
+            dyn.writeReg(gotId, 27, 255, 1);
             MessageBox.Show("Красный светодиод должен загореться");
             Thread.Sleep(200);
-            dyn.writeReg(gotId, 27, 0);
+            dyn.writeReg(gotId, 27, 0, 1);
             Thread.Sleep(200);
-            dyn.writeReg(gotId, 28, 255);
+            dyn.writeReg(gotId, 28, 255, 1);
             MessageBox.Show("Синий светодиод должен загореться");
             Thread.Sleep(200);
-            dyn.writeReg(gotId, 28, 0);
+            dyn.writeReg(gotId, 28, 0, 1);
         }
 
         public override bool needThreadPause()

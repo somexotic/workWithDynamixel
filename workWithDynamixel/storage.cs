@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Linq;
+using System.Security.Permissions;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -11,24 +12,24 @@ namespace workWithDynamixel
 {
     public enum BaseReg
     {
-        AR_BALL = 2,
-        AR_BUTTON = 3,
-        AR_COLOR = 4,
+        AR_BALL = 2,//done
+        AR_BUTTON = 3,//done
+        AR_LIGHT = 4,//done
         AR_DRIVER = 5,
         AR_DRIVER2 = 6,
         AR_ENCODER = 7,
         AR_IR_RX = 8,
-        AR_LED = 9,
+        AR_LED = 9,//done
         AR_LINE = 10,
         AR_IMU_MAG = 16,
         AR_NMOS = 17,
         AR_NOISE = 18,
-        AR_POT = 19,
+        AR_POT = 19,//done
         AR_PRESS = 20,
-        AR_RGB = 21,
+        AR_RGB = 21,//done
         AR_TEMP = 22,
         AR_uSW = 23,
-        AR_BUZZER = 24
+        AR_BUZZER = 24//done
     }
 
     internal class storage
@@ -36,6 +37,7 @@ namespace workWithDynamixel
         public static int lastId = 0;
         public static int openedPort = -1;
         public static string com_port = "";
+        public static int listBoxLastIndex = -1;
         public static int gotBaudrate = 0;
         public PeripheryBase getClass(string type, int id, Form1 form)
         {
@@ -47,6 +49,16 @@ namespace workWithDynamixel
                     return new AR_LED(id);
                 case "AR_RGB":
                     return new AR_RGB(id);
+                case "AR_BUZZER":
+                    return new AR_BUZZER(id);
+                case "AR_POT":
+                    return new AR_POT(id);
+                case "AR_LIGHT":
+                    return new AR_LIGHT(id);
+                case "AR_BALL":
+                    return new AR_BALL(id);
+                case "AR_TEMP":
+                    return new AR_TEMP(id);
                 default:
                     return null;
             }
@@ -62,6 +74,7 @@ namespace workWithDynamixel
             list[2] = "Версия встроенного ПО. Доступ R/W";
             list[3] = "Адрес устройства. Доступ R/W";
             list[4] = "Скорость обмена данными. Доступ R/W";
+            list[5] = "Return delay time";
 
             for(int i = 24; i < 50; i++)
             {
@@ -86,6 +99,89 @@ namespace workWithDynamixel
                                 break;
                             case 28:
                                 list.Add("Интенсивность синего свечения");
+                                break;
+                            default:
+                                list.Add("");
+                                break;
+                        }
+                        break;
+                    case "AR_BUZZER":
+                        switch (i)
+                        {
+                            case 26:
+                                list.Add("Значение частоты");
+                                i++;
+                                break;
+                            case 28:
+                                list.Add("Значение скважности");
+                                break;
+                            default:
+                                list.Add("");
+                                break;
+                        }
+                        break;
+                    case "AR_POT":
+                        switch(i)
+                        {
+                            case 26:
+                                list.Add("Значение потенциометра");
+                                break;
+                            default:
+                                list.Add("");
+                                break;
+                        }
+                        break;
+                    case "AR_LIGHT":
+                        switch (i)
+                        {
+                            case 24: list.Add("Яркость фотодиода без фильтра. R"); i++;  break;
+                            case 26: list.Add("Якрость фотодиода с красным фильтром. R"); i++; break;
+                            case 28: list.Add("Яркость фотодиода с зеленым фильтром. R"); i++; break;
+                            case 30: list.Add("Яркость фотодиода с синим фильтром. R"); i++; break;
+                            case 32: list.Add("Освещение в люксах. R"); i++; break;
+                            case 34: list.Add("Цветовая темп. в Кельвинах. R"); i++; break;
+                            case 36: list.Add("Цветовые координаты по шкале HSV. R"); i++; break;
+                            case 38: list.Add("Программное усиление. R"); break;
+                            case 40: list.Add("Значение цветового оттенка. R"); break;
+                            case 42: list.Add("Яркость светодиода подсветки. W"); break;
+                            case 46: list.Add("Порог освещенности до церного. W"); i++; break;
+                            case 48: list.Add("Минимальная разница между знач. К, С. З. W");break;
+                            default:
+                                list.Add("");
+                                break;
+                        }
+                        break;
+                    case "AR_BALL":
+                        switch (i)
+                        {
+                            case 26:
+                                list.Add("Состояние наклона по X");
+                                break;
+                            case 27:
+                                list.Add("Состояние наклона по Y");
+                                break;
+                            default:
+                                list.Add("");
+                                break;
+                        }
+                        break;
+                    case "AR_TEMP":
+                        switch (i)
+                        {
+                            case 24:
+                                list.Add("Целая часть от влажности");
+                                break;
+                            case 26:
+                                list.Add("Десятичная часть от влажности");
+                                break;
+                            case 28:
+                                list.Add("Целая часть от температуры");
+                                break;
+                            case 30:
+                                list.Add("Десятичная часть от температуры");
+                                break;
+                            case 34:
+                                list.Add("Значение температуры");
                                 break;
                             default:
                                 list.Add("");

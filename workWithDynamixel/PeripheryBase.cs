@@ -16,7 +16,7 @@ namespace workWithDynamixel
         public Dictionary<int, int> registers = new Dictionary<int, int>();
         protected Dictionary<int, int> gotData = new Dictionary<int, int>();
         protected baseDynamixel dyn = new baseDynamixel();
-        protected int gotId = 0;
+        public int gotId = 0;
         protected bool firstDraw = true;
         protected object locker = new object();
         public abstract void getRegistersById(int id, Form1 form, CancellationToken token, ManualResetEvent pause);
@@ -39,8 +39,48 @@ namespace workWithDynamixel
                     {
                         switch (i)
                         {
-                            case 26:
+                            case 34:
                                 regToRead.Add(i); lengOfReg.Add(2); i++; break;
+                            default:
+                                regToRead.Add(i); lengOfReg.Add(1); break;
+                        }
+                    }
+                    break;
+                case "AR_BUZZER":
+                    for (int i = 24; i < 50; i++)
+                    {
+                        switch (i)
+                        {
+                            case 26: regToRead.Add(i); lengOfReg.Add(2); i++; break;
+                            default:
+                                regToRead.Add(i); lengOfReg.Add(1); break;
+                        }
+                    }
+                    break;
+                case "AR_POT":
+                    for(int i = 24; i < 50; i++)
+                    {
+                        switch (i)
+                        {
+                            case 26: regToRead.Add(i); lengOfReg.Add(2); i++; break;
+                            default:
+                                regToRead.Add(i); lengOfReg.Add(1); break;
+                        }
+                    }
+                    break;
+                case "AR_LIGHT":
+                    for (int i = 24; i < 50; i++)
+                    {
+                        switch (i)
+                        {
+                            case 24: regToRead.Add(i); lengOfReg.Add(2); i++; break;
+                            case 26: regToRead.Add(i); lengOfReg.Add(2); i++; break;
+                            case 28: regToRead.Add(i); lengOfReg.Add(2); i++; break;
+                            case 30: regToRead.Add(i); lengOfReg.Add(2); i++; break;
+                            case 32: regToRead.Add(i); lengOfReg.Add(2); i++; break;
+                            case 34: regToRead.Add(i); lengOfReg.Add(2); i++; break;
+                            case 36: regToRead.Add(i); lengOfReg.Add(2); i++; break;
+                            case 46: regToRead.Add(i); lengOfReg.Add(2); i++; break;
                             default:
                                 regToRead.Add(i); lengOfReg.Add(1); break;
                         }
