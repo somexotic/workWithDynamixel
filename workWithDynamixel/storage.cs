@@ -1,11 +1,5 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Collections.Specialized;
-using System.Linq;
-using System.Security.Permissions;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace workWithDynamixel
@@ -14,8 +8,8 @@ namespace workWithDynamixel
     {
         AR_BALL = 2,//done
         AR_BUTTON = 3,//done
-        AR_LIGHT = 4,//done
-        AR_DRIVER = 5,
+        AR_LIGHT = 4,//done//haveArduino
+        AR_DRIVER = 5,//done
         AR_DRIVER2 = 6,
         AR_ENCODER = 7,
         AR_IR_RX = 8,
@@ -26,10 +20,10 @@ namespace workWithDynamixel
         AR_NOISE = 18,
         AR_POT = 19,//done
         AR_PRESS = 20,
-        AR_RGB = 21,//done
+        AR_RGB = 21,//done//haveArduino
         AR_TEMP = 22,
         AR_uSW = 23,
-        AR_BUZZER = 24//done
+        AR_BUZZER = 24//done//haveArduino
     }
 
     internal class storage
@@ -59,8 +53,10 @@ namespace workWithDynamixel
                     return new AR_BALL(id);
                 case "AR_TEMP":
                     return new AR_TEMP(id);
+                case "AR_DRIVER":
+                    return new AR_LIGHT(id);
                 default:
-                    return null;
+                    return new AR_TEMPLATE(id);
             }
         }
         public static List<string> getRegInfo(string type)
@@ -68,13 +64,14 @@ namespace workWithDynamixel
             List<string> list = new List<string>();
             for (int i = 0; i <= 23; i++)
             {
+                if (i == 1) continue;
                 list.Add("");
             }
-            list[0] = "Базовый id. Доступ: R/W";
-            list[2] = "Версия встроенного ПО. Доступ R/W";
-            list[3] = "Адрес устройства. Доступ R/W";
-            list[4] = "Скорость обмена данными. Доступ R/W";
-            list[5] = "Return delay time";
+            list[0] = "Базовый id. Доступ: R";
+            list[1] = "Версия встроенного ПО. Доступ R";
+            list[2] = "Адрес устройства. Доступ R/W";
+            list[3] = "Скорость обмена данными. Доступ R";
+            list[4] = "Return delay time";
 
             for(int i = 24; i < 50; i++)
             {
@@ -181,8 +178,35 @@ namespace workWithDynamixel
                                 list.Add("Десятичная часть от температуры");
                                 break;
                             case 34:
-                                list.Add("Значение температуры");
+                                list.Add("Значение температуры");i++;break;
+                            default:
+                                list.Add("");
                                 break;
+                        }
+                        break;
+                    case "AR_DRIVER":
+                        switch (i)
+                        {
+                            case 24:
+                                list.Add("Макс. мощность двигателя");i++;break;
+                            case 27:
+                                list.Add("Режим работы энкодера"); break;
+                            case 28:
+                                list.Add("Задает мощность двигателя"); i++; break;
+                            case 32:
+                                list.Add("Количество тиков энкодера"); i++; break;
+                            case 34:
+                                list.Add("Текущая скорость"); i++; break;
+                            case 40:
+                                list.Add("Задать скорость"); i++; break;
+                            case 45:
+                                list.Add("Длительность цикла управления");break;
+                            case 47:
+                                list.Add("ПИД регулятор. P");break;
+                            case 48:
+                                list.Add("ПИД регулятор. I");break;
+                            case 49:
+                                list.Add("ПИД регулятор. D");break;
                             default:
                                 list.Add("");
                                 break;

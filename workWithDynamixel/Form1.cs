@@ -1,15 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.IO.Ports;
 using System.Threading;
-using System.Runtime.InteropServices;
 
 namespace workWithDynamixel
 {
@@ -75,7 +67,6 @@ namespace workWithDynamixel
 
         private void listBox1_SelectedIndexChanged(object sender, EventArgs e)
         {
-            MouseEventArgs mouseEvent = e as MouseEventArgs;
             if (!gotClick) return;
             dataGridView1.Visible = true;
             if (listBox1.SelectedItem == null) return;
@@ -97,13 +88,15 @@ namespace workWithDynamixel
                 Console.WriteLine(ex.Message);
             }
             gotClass = store.getClass(getName[0].ToString(), gotId, this);
-            Thread read = new Thread(() => gotClass.getRegistersById(gotId, this, cancellationTokenSource.Token, pause));
+            Thread read = new Thread(() => gotClass.getRegistersById(gotId, this, cancellationTokenSource.Token, pause, getName[0].ToString()));
             lastThread = read;
             read.Start();
             panel1.Visible = true;
             testPanel.Visible = true;
             panel2.Visible = true;
             gotClick = false;
+            pictureBox1.Visible = true;
+            panel3.Visible = true;
         }
 
         private void Form1_FormClosing(object sender, FormClosingEventArgs e)
@@ -120,6 +113,16 @@ namespace workWithDynamixel
             if (byteSize.Text == "" || Int32.Parse(byteSize.Text) < 1 ) return;
             int byteSizeValue = Int32.Parse(byteSize.Text);
             if (byteSizeValue < 1 || byteSizeValue > 2) return;
+
+            switch(regToWrite.Text)
+            {
+                case "0": return;
+                case "1": return;
+                case "2": return;
+                case "4": return;
+                case "5": return;
+            }
+
             if (pause.Reset())
             {
                 Thread.Sleep(250);
@@ -185,6 +188,18 @@ namespace workWithDynamixel
             else
             {
                 gotClick = false;
+            }
+        }
+
+        private void button5_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                gotClass.createArduinoFile();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message.ToString());
             }
         }
     }

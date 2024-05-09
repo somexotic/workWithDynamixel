@@ -18,28 +18,9 @@ namespace workWithDynamixel
             gotId = id;
         }
 
-        public override void getRegistersById(int id, Form1 form, CancellationToken token, ManualResetEvent pause)
+        public override void createArduinoFile()
         {
-            getRegData("AR_BUTTON");
-            var data = new dataStruct { prop1 = registers, id = id, regToRead = regToRead, lengOfReg = lengOfReg };
-            gotData = dyn.getReg(data);
-            if (firstDraw)
-            {
-                storage.firstDrawOfGrid(form, gotData, storage.getRegInfo("AR_BUTTON"));
-                firstDraw = false;
-            }
-            while (!token.IsCancellationRequested)
-            {
-                if (pause.WaitOne())
-                {
-                    gotData = dyn.getReg(data);
-                    lock (locker)
-                    {
-                        Monitor.Pulse(locker);
-                    }
-                    storage.drawByData(form, gotData);
-                }
-            }
+            throw new NotImplementedException();
         }
 
         public override void testDevice()

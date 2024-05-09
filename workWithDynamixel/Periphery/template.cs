@@ -6,7 +6,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace workWithDynamixel.Periphery
+namespace workWithDynamixel
 {
     internal class AR_TEMPLATE : PeripheryBase
     {
@@ -15,7 +15,7 @@ namespace workWithDynamixel.Periphery
             gotId = id;
         }
 
-        public override void getRegistersById(int id, Form1 form, CancellationToken token, ManualResetEvent pause)
+        public override void createArduinoFile()
         {
             throw new NotImplementedException();
         }

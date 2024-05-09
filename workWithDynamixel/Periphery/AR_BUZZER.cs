@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using static System.Windows.Forms.LinkLabel;
 
 namespace workWithDynamixel
 {
@@ -15,28 +17,30 @@ namespace workWithDynamixel
             gotId = id;
         }
 
-        public override void getRegistersById(int id, Form1 form, CancellationToken token, ManualResetEvent pause)
+        public override void createArduinoFile()
         {
-            getRegData("AR_BUZZER");
-            var data = new dataStruct { prop1 = registers, id = id, regToRead = regToRead, lengOfReg = lengOfReg };
-            gotData = dyn.getReg(data);
-            if (firstDraw)
+            string fileName = "writeBuzzer.ino";
+            string[] text =
             {
-                storage.firstDrawOfGrid(form, gotData, storage.getRegInfo("AR_BUZZER"));
-                firstDraw = false;
-            }
-            while (!token.IsCancellationRequested)
-            {
-                if (pause.WaitOne())
-                {
-                    gotData = dyn.getReg(data);
-                    lock (locker)
-                    {
-                        Monitor.Pulse(locker);
-                    }
-                    storage.drawByData(form, gotData);
-                }
-            }
+                "#include <DxlMaster.h> //Библиотека для работы с  Dynamixel",
+                "",
+                "DynamixelDevice buzzer(" + gotData[3].ToString() + "); //Инициализация устройства",
+                "",
+                "uint16_t freq = " + gotData[26].ToString() + "; //Частота звука",
+                "uint8_t duty = " + gotData[28].ToString() + ";//Скважность звука",
+                "",
+                "void setup() {",
+                "  DxlMaster.begin(57600); //Начало работы с Dynamixel устройствами",
+                "  buzzer.init(); //Иницализация устройства",
+                "  buzzer.write(26, freq); //Запись в регистр",
+                "  buzzer.write(28, duty); //Запись в регистр",
+                "}",
+                "",
+                "void loop() {",
+                "}",
+            };
+
+            File.WriteAllLines(fileName, text);
         }
 
         public override void testDevice()

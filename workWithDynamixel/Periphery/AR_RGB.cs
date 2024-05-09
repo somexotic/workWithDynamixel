@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -15,21 +16,35 @@ namespace workWithDynamixel
             gotId = id;
         }
 
-        public override void getRegistersById(int id, Form1 form, CancellationToken token, ManualResetEvent pause)
+        public override void createArduinoFile()
         {
-            getRegData("AR_RGB");
-            var data = new dataStruct { prop1 = registers, id = id, regToRead = regToRead, lengOfReg = lengOfReg };
-            gotData = dyn.getReg(data);
-            if (firstDraw)
+            string fileName = "writeRgb.ino";
+            string[] text =
             {
-                storage.firstDrawOfGrid(form, gotData, storage.getRegInfo("AR_RGB"));
-                firstDraw = false;
-            }
-            while (!token.IsCancellationRequested)
-            {
-                gotData = dyn.getReg(data);
-                storage.drawByData(form, gotData);
-            }
+                "#include <DxlMaster.h> //Библиотека для работы с  Dynamixel",
+                "",
+                "DynamixelDevice rgb(" + gotData[3].ToString() + "); //Инициализация устройства",
+                "",
+                "uint8_t red_value = 255; //Значение красного светодиода",
+                "uint8_t green_value = 255;//Значение зеленого светодиода",
+                "uint8_t blue_value = 255;//Значение синего светодиода",
+                "",
+                "void setup() {",
+                "  DxlMaster.begin(57600); //Начало работы с Dynamixel устройствами",
+                "  rgb.init(); //Иницализация устройства",
+                "}",
+                "",
+                "void loop() {",
+                "  rgb.write(26, green_value);",
+                "  delay(200);",
+                "  rgb.write(27, red_value);",
+                "  delay(200);",
+                "  rgb.write(28, blue_value);",
+                "  delay(200);",
+                "}",
+            };
+
+            File.WriteAllLines(fileName, text);
         }
 
         public override void testDevice()

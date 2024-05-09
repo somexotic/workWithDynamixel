@@ -1,9 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Drawing;
-using System.Linq;
-using System.Reflection.Emit;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -128,7 +124,6 @@ namespace workWithDynamixel
                         dynamixel.write2ByteTxRx(storage.openedPort, 1, (byte)id, (ushort)reg, (ushort)value);
                         break;
                 }
-                dynamixel.write1ByteTxRx(storage.openedPort, 1, (byte)id, (ushort)reg,(byte)value);
             }
             catch
             {
