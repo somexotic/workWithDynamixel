@@ -36,6 +36,7 @@ namespace workWithDynamixel
                 listBox1.Items.Clear();
                 if (baud.Text == "") return;
                 if (maxSearch.Text == "" || Int32.Parse(maxSearch.Text) < 1) return;
+                if (comboBox1.SelectedItem.ToString() == "") return;
                 button1.Enabled = false;
                 await dyn.findDynamixel(comboBox1.SelectedItem.ToString(), Int32.Parse(baud.Text), Int32.Parse(maxSearch.Text));
                 
@@ -88,7 +89,7 @@ namespace workWithDynamixel
                 Console.WriteLine(ex.Message);
             }
             gotClass = store.getClass(getName[0].ToString(), gotId, this);
-            Thread read = new Thread(() => gotClass.getRegistersById(gotId, this, cancellationTokenSource.Token, pause, getName[0].ToString()));
+            Thread read = new Thread(() => gotClass.getRegistersById(this, cancellationTokenSource.Token, pause, getName[0].ToString()));
             lastThread = read;
             read.Start();
             panel1.Visible = true;

@@ -123,6 +123,8 @@ namespace workWithDynamixel
                     case 2:
                         dynamixel.write2ByteTxRx(storage.openedPort, 1, (byte)id, (ushort)reg, (ushort)value);
                         break;
+                    default:
+                        return;
                 }
             }
             catch

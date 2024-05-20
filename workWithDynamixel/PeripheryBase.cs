@@ -12,9 +12,29 @@ namespace workWithDynamixel
         public int gotId = 0;
         protected bool firstDraw = true;
         protected object locker = new object();
-        public void getRegistersById(int id, Form1 form, CancellationToken token, ManualResetEvent pause, string peripheryType)
+        public void getRegistersById(Form1 form, CancellationToken token, ManualResetEvent pause, string peripheryType)
         {
-            startReadData(peripheryType, id, form, token, pause);
+            getRegData(peripheryType);
+            //тут передать айди из form?
+            var data = new dataStruct { regToRead = regToRead, lengOfReg = lengOfReg };
+            gotData = dyn.getReg(data);
+            if (firstDraw)
+            {
+                storage.firstDrawOfGrid(form, gotData, storage.getRegInfo(peripheryType));
+                firstDraw = false;
+            }   
+            while (!token.IsCancellationRequested)
+            {
+                if (pause.WaitOne())
+                {
+                    gotData = dyn.getReg(data);
+                    lock (locker)
+                    {
+                        Monitor.Pulse(locker);
+                    }
+                    storage.drawByData(form, gotData);
+                }
+            }
         }
         public abstract void testDevice();
         public abstract bool needThreadPause();
@@ -109,38 +129,11 @@ namespace workWithDynamixel
                     break;
             }
         }
-
-        protected void startReadData(string peripheryType, int id, Form1 form, CancellationToken token, ManualResetEvent pause)
-        {
-            getRegData(peripheryType);
-            var data = new dataStruct { prop1 = registers, id = id, regToRead = regToRead, lengOfReg = lengOfReg };
-            gotData = dyn.getReg(data);
-            if (firstDraw)
-            {
-                storage.firstDrawOfGrid(form, gotData, storage.getRegInfo(peripheryType));
-                firstDraw = false;
-            }
-            while (!token.IsCancellationRequested)
-            {
-                if (pause.WaitOne())
-                {
-                    gotData = dyn.getReg(data);
-                    lock (locker)
-                    {
-                        Monitor.Pulse(locker);
-                    }
-                    storage.drawByData(form, gotData);
-                }
-            }
-        }
     }
 
     internal class dataStruct
     {
-        public Dictionary<int, int> prop1 { get; set; }
-        public int id { get; set; }
         public List<int> regToRead { get; set; }
         public List<int> lengOfReg { get; set; }
-        public Dictionary<int, int> result { get; set; }
     }
 }
