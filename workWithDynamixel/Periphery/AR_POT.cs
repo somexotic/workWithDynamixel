@@ -36,13 +36,13 @@ namespace workWithDynamixel
 
         public void waitForChange(CancellationToken token, CancellationTokenSource source)
         {
-            int lastValue = gotData[26];
+            int lastValue = (int)gotData[26];
             bool changed = false;
             lock (locker)
             {
                 while (!token.IsCancellationRequested)
                 {
-                    while (lastValue == gotData[26])
+                    while (lastValue == (int)gotData[26])
                     {
                         Monitor.Wait(locker);
                         changed = true;

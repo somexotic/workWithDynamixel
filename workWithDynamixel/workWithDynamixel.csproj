@@ -106,6 +106,7 @@
     <Compile Include="Periphery\AR_POT.cs" />
     <Compile Include="Periphery\AR_RGB.cs" />
     <Compile Include="Periphery\AR_TEMP.cs" />
+    <Compile Include="Periphery\Servo.cs" />
     <Compile Include="Periphery\template.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

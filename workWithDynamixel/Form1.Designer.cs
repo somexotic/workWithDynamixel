@@ -58,18 +58,33 @@
             this.panel3 = new System.Windows.Forms.Panel();
             this.button5 = new System.Windows.Forms.Button();
             this.label11 = new System.Windows.Forms.Label();
+            this.protocol = new System.Windows.Forms.TextBox();
+            this.label12 = new System.Windows.Forms.Label();
+            this.panelForPeriphery = new System.Windows.Forms.Panel();
+            this.panelForServo = new System.Windows.Forms.Panel();
+            this.LED = new System.Windows.Forms.CheckBox();
+            this.torque = new System.Windows.Forms.CheckBox();
+            this.comboBox2 = new System.Windows.Forms.ComboBox();
+            this.button6 = new System.Windows.Forms.Button();
+            this.panel4 = new System.Windows.Forms.Panel();
+            this.modelName = new System.Windows.Forms.Label();
+            this.button7 = new System.Windows.Forms.Button();
+            this.button8 = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
             this.panel1.SuspendLayout();
             this.testPanel.SuspendLayout();
             this.panel2.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.panel3.SuspendLayout();
+            this.panelForPeriphery.SuspendLayout();
+            this.panelForServo.SuspendLayout();
+            this.panel4.SuspendLayout();
             this.SuspendLayout();
             // 
             // button1
             // 
             this.button1.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            this.button1.Location = new System.Drawing.Point(50, 120);
+            this.button1.Location = new System.Drawing.Point(50, 155);
             this.button1.Name = "button1";
             this.button1.Size = new System.Drawing.Size(122, 40);
             this.button1.TabIndex = 0;
@@ -82,9 +97,9 @@
             this.listBox1.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
             this.listBox1.FormattingEnabled = true;
             this.listBox1.ItemHeight = 20;
-            this.listBox1.Location = new System.Drawing.Point(12, 176);
+            this.listBox1.Location = new System.Drawing.Point(12, 216);
             this.listBox1.Name = "listBox1";
-            this.listBox1.Size = new System.Drawing.Size(194, 364);
+            this.listBox1.Size = new System.Drawing.Size(194, 324);
             this.listBox1.TabIndex = 2;
             this.listBox1.SelectedIndexChanged += new System.EventHandler(this.listBox1_SelectedIndexChanged);
             this.listBox1.MouseDown += new System.Windows.Forms.MouseEventHandler(this.listBox1_MouseDown);
@@ -118,6 +133,7 @@
             // 
             // comboBox1
             // 
+            this.comboBox1.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.comboBox1.FormattingEnabled = true;
             this.comboBox1.Location = new System.Drawing.Point(96, 50);
             this.comboBox1.Name = "comboBox1";
@@ -164,11 +180,10 @@
             this.panel1.Controls.Add(this.label3);
             this.panel1.Controls.Add(this.regToWrite);
             this.panel1.Controls.Add(this.button2);
-            this.panel1.Location = new System.Drawing.Point(753, 12);
+            this.panel1.Location = new System.Drawing.Point(4, 0);
             this.panel1.Name = "panel1";
             this.panel1.Size = new System.Drawing.Size(269, 117);
             this.panel1.TabIndex = 13;
-            this.panel1.Visible = false;
             // 
             // byteSize
             // 
@@ -243,11 +258,10 @@
             this.testPanel.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.testPanel.Controls.Add(this.button3);
             this.testPanel.Controls.Add(this.label7);
-            this.testPanel.Location = new System.Drawing.Point(753, 153);
+            this.testPanel.Location = new System.Drawing.Point(4, 127);
             this.testPanel.Name = "testPanel";
             this.testPanel.Size = new System.Drawing.Size(269, 40);
             this.testPanel.TabIndex = 14;
-            this.testPanel.Visible = false;
             // 
             // button3
             // 
@@ -275,11 +289,10 @@
             this.panel2.Controls.Add(this.button4);
             this.panel2.Controls.Add(this.label9);
             this.panel2.Controls.Add(this.label8);
-            this.panel2.Location = new System.Drawing.Point(753, 440);
+            this.panel2.Location = new System.Drawing.Point(4, 420);
             this.panel2.Name = "panel2";
             this.panel2.Size = new System.Drawing.Size(269, 100);
             this.panel2.TabIndex = 15;
-            this.panel2.Visible = false;
             // 
             // button4
             // 
@@ -312,13 +325,13 @@
             // pictureBox1
             // 
             this.pictureBox1.Image = global::workWithDynamixel.Properties.Resources.logo_AR_blue;
-            this.pictureBox1.Location = new System.Drawing.Point(753, 254);
+            this.pictureBox1.Location = new System.Drawing.Point(6, 223);
             this.pictureBox1.Name = "pictureBox1";
             this.pictureBox1.Size = new System.Drawing.Size(269, 180);
             this.pictureBox1.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
             this.pictureBox1.TabIndex = 16;
             this.pictureBox1.TabStop = false;
-            this.pictureBox1.Visible = false;
+            this.pictureBox1.Click += new System.EventHandler(this.pictureBox1_Click);
             // 
             // panel3
             // 
@@ -326,11 +339,10 @@
             this.panel3.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.panel3.Controls.Add(this.button5);
             this.panel3.Controls.Add(this.label11);
-            this.panel3.Location = new System.Drawing.Point(753, 199);
+            this.panel3.Location = new System.Drawing.Point(4, 177);
             this.panel3.Name = "panel3";
             this.panel3.Size = new System.Drawing.Size(269, 40);
             this.panel3.TabIndex = 17;
-            this.panel3.Visible = false;
             // 
             // button5
             // 
@@ -351,17 +363,152 @@
             this.label11.TabIndex = 0;
             this.label11.Text = "Сделать Arduino код";
             // 
+            // protocol
+            // 
+            this.protocol.Location = new System.Drawing.Point(97, 119);
+            this.protocol.Name = "protocol";
+            this.protocol.Size = new System.Drawing.Size(121, 20);
+            this.protocol.TabIndex = 19;
+            this.protocol.TextChanged += new System.EventHandler(this.textBox1_TextChanged);
+            // 
+            // label12
+            // 
+            this.label12.AutoSize = true;
+            this.label12.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.label12.Location = new System.Drawing.Point(12, 119);
+            this.label12.Name = "label12";
+            this.label12.Size = new System.Drawing.Size(84, 20);
+            this.label12.TabIndex = 18;
+            this.label12.Text = "Протокол";
+            // 
+            // panelForPeriphery
+            // 
+            this.panelForPeriphery.Controls.Add(this.panel1);
+            this.panelForPeriphery.Controls.Add(this.testPanel);
+            this.panelForPeriphery.Controls.Add(this.panel3);
+            this.panelForPeriphery.Controls.Add(this.panel2);
+            this.panelForPeriphery.Controls.Add(this.pictureBox1);
+            this.panelForPeriphery.Location = new System.Drawing.Point(753, 12);
+            this.panelForPeriphery.Name = "panelForPeriphery";
+            this.panelForPeriphery.Size = new System.Drawing.Size(281, 528);
+            this.panelForPeriphery.TabIndex = 20;
+            this.panelForPeriphery.Visible = false;
+            // 
+            // panelForServo
+            // 
+            this.panelForServo.Controls.Add(this.LED);
+            this.panelForServo.Controls.Add(this.torque);
+            this.panelForServo.Controls.Add(this.comboBox2);
+            this.panelForServo.Controls.Add(this.button6);
+            this.panelForServo.Controls.Add(this.panel4);
+            this.panelForServo.Location = new System.Drawing.Point(423, 12);
+            this.panelForServo.Name = "panelForServo";
+            this.panelForServo.Size = new System.Drawing.Size(281, 528);
+            this.panelForServo.TabIndex = 21;
+            this.panelForServo.Visible = false;
+            // 
+            // LED
+            // 
+            this.LED.AutoSize = true;
+            this.LED.Font = new System.Drawing.Font("Microsoft Sans Serif", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.LED.Location = new System.Drawing.Point(182, 149);
+            this.LED.Name = "LED";
+            this.LED.Size = new System.Drawing.Size(65, 28);
+            this.LED.TabIndex = 4;
+            this.LED.Text = "LED";
+            this.LED.UseVisualStyleBackColor = true;
+            this.LED.CheckedChanged += new System.EventHandler(this.LED_CheckedChanged);
+            // 
+            // torque
+            // 
+            this.torque.AutoSize = true;
+            this.torque.Font = new System.Drawing.Font("Microsoft Sans Serif", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.torque.Location = new System.Drawing.Point(182, 118);
+            this.torque.Name = "torque";
+            this.torque.Size = new System.Drawing.Size(91, 28);
+            this.torque.TabIndex = 3;
+            this.torque.Text = "Torque";
+            this.torque.UseVisualStyleBackColor = true;
+            this.torque.CheckedChanged += new System.EventHandler(this.torque_CheckedChanged);
+            // 
+            // comboBox2
+            // 
+            this.comboBox2.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.comboBox2.FormattingEnabled = true;
+            this.comboBox2.Items.AddRange(new object[] {
+            "Current control",
+            "Velocity control",
+            "Position control",
+            "Extended-Position control",
+            "Current-based control",
+            "PWM control"});
+            this.comboBox2.Location = new System.Drawing.Point(151, 91);
+            this.comboBox2.Name = "comboBox2";
+            this.comboBox2.Size = new System.Drawing.Size(121, 21);
+            this.comboBox2.TabIndex = 2;
+            // 
+            // button6
+            // 
+            this.button6.Location = new System.Drawing.Point(182, 57);
+            this.button6.Name = "button6";
+            this.button6.Size = new System.Drawing.Size(75, 23);
+            this.button6.TabIndex = 1;
+            this.button6.Text = "Reboot";
+            this.button6.UseVisualStyleBackColor = true;
+            this.button6.Click += new System.EventHandler(this.button6_Click);
+            // 
+            // panel4
+            // 
+            this.panel4.BackColor = System.Drawing.SystemColors.Highlight;
+            this.panel4.Controls.Add(this.modelName);
+            this.panel4.Location = new System.Drawing.Point(3, 6);
+            this.panel4.Name = "panel4";
+            this.panel4.Size = new System.Drawing.Size(275, 43);
+            this.panel4.TabIndex = 0;
+            // 
+            // modelName
+            // 
+            this.modelName.AutoSize = true;
+            this.modelName.Font = new System.Drawing.Font("Microsoft Sans Serif", 15.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.modelName.ForeColor = System.Drawing.Color.Snow;
+            this.modelName.Location = new System.Drawing.Point(59, 7);
+            this.modelName.Name = "modelName";
+            this.modelName.Size = new System.Drawing.Size(0, 25);
+            this.modelName.TabIndex = 0;
+            this.modelName.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            // 
+            // button7
+            // 
+            this.button7.Location = new System.Drawing.Point(173, 189);
+            this.button7.Name = "button7";
+            this.button7.Size = new System.Drawing.Size(75, 23);
+            this.button7.TabIndex = 3;
+            this.button7.Text = "Disconnect";
+            this.button7.UseVisualStyleBackColor = true;
+            this.button7.Click += new System.EventHandler(this.button7_Click);
+            // 
+            // button8
+            // 
+            this.button8.Location = new System.Drawing.Point(173, 156);
+            this.button8.Name = "button8";
+            this.button8.Size = new System.Drawing.Size(75, 23);
+            this.button8.TabIndex = 22;
+            this.button8.Text = "button8";
+            this.button8.UseVisualStyleBackColor = true;
+            this.button8.Click += new System.EventHandler(this.button8_Click);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.SystemColors.HighlightText;
             this.ClientSize = new System.Drawing.Size(1034, 561);
-            this.Controls.Add(this.panel3);
-            this.Controls.Add(this.pictureBox1);
-            this.Controls.Add(this.panel2);
-            this.Controls.Add(this.testPanel);
-            this.Controls.Add(this.panel1);
+            this.Controls.Add(this.button8);
+            this.Controls.Add(this.button7);
+            this.Controls.Add(this.panelForServo);
+            this.Controls.Add(this.panelForPeriphery);
+            this.Controls.Add(this.protocol);
+            this.Controls.Add(this.label12);
             this.Controls.Add(this.maxSearch);
             this.Controls.Add(this.label5);
             this.Controls.Add(this.dataGridView1);
@@ -388,6 +535,11 @@
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
             this.panel3.ResumeLayout(false);
             this.panel3.PerformLayout();
+            this.panelForPeriphery.ResumeLayout(false);
+            this.panelForServo.ResumeLayout(false);
+            this.panelForServo.PerformLayout();
+            this.panel4.ResumeLayout(false);
+            this.panel4.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -424,6 +576,18 @@
         private System.Windows.Forms.Panel panel3;
         private System.Windows.Forms.Button button5;
         private System.Windows.Forms.Label label11;
+        private System.Windows.Forms.TextBox protocol;
+        private System.Windows.Forms.Label label12;
+        private System.Windows.Forms.Panel panelForPeriphery;
+        private System.Windows.Forms.Panel panelForServo;
+        private System.Windows.Forms.Panel panel4;
+        private System.Windows.Forms.Button button6;
+        private System.Windows.Forms.ComboBox comboBox2;
+        public System.Windows.Forms.Label modelName;
+        private System.Windows.Forms.Button button7;
+        private System.Windows.Forms.CheckBox torque;
+        private System.Windows.Forms.CheckBox LED;
+        private System.Windows.Forms.Button button8;
     }
 }
 

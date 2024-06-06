@@ -43,11 +43,11 @@ namespace workWithDynamixel
             {
                 while (!token.IsCancellationRequested)
                 {
-                    while (gotData[27] != 1)
+                    while ((int)gotData[27] != 1)
                     {
                         Monitor.Wait(locker);
                     }
-                    if (gotData[27] == 1)
+                    if ((int)gotData[27] == 1)
                     {
                         MessageBox.Show("Успешно");
                         source.Cancel();

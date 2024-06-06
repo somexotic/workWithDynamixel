@@ -2,6 +2,7 @@
 using System.Windows.Forms;
 using System.IO.Ports;
 using System.Threading;
+using System.Drawing;
 
 namespace workWithDynamixel
 {
@@ -15,6 +16,11 @@ namespace workWithDynamixel
         public static CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
         protected static CancellationToken cancellationToken = cancellationTokenSource.Token;
         protected ManualResetEvent pause = new ManualResetEvent(true);
+        protected bool isDisconnected = false;
+        protected string className = "";
+        protected Thread read = null;
+        public static int changeLed = 0;
+        public static int changeTorque = 0;
 
         public Form1()
         {
@@ -26,6 +32,7 @@ namespace workWithDynamixel
                 comboBox1.Items.Add(port);
             }
             comboBox1.SelectedIndex = 0;
+            dataGridView1.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
         }
 
         private async void button1_Click(object sender, EventArgs e)
@@ -37,20 +44,34 @@ namespace workWithDynamixel
                 if (baud.Text == "") return;
                 if (maxSearch.Text == "" || Int32.Parse(maxSearch.Text) < 1) return;
                 if (comboBox1.SelectedItem.ToString() == "") return;
+                if (Int32.Parse(protocol.Text) > 2 || Int32.Parse(protocol.Text) < 1) return;
                 button1.Enabled = false;
-                await dyn.findDynamixel(comboBox1.SelectedItem.ToString(), Int32.Parse(baud.Text), Int32.Parse(maxSearch.Text));
-                
-                for(int i = 0; i < dyn.listOfIds.Count; i++)
+                await dyn.findDynamixel(comboBox1.SelectedItem.ToString(), Int32.Parse(baud.Text), Int32.Parse(maxSearch.Text), Int32.Parse(protocol.Text));
+
+                for(int i = 0; i < dyn.dynDataList.Count; i++)
                 {
-                    string str = dyn.listOfNames[i] + ": " + dyn.listOfIds[i].ToString();
+                    string str = "";
+
+                    if (dyn.dynDataList[i].type == "periphery")
+                    {
+                        str += "P_";
+                        str += dyn.dynDataList[i].baseName;
+                        str += ": ";
+                        str += dyn.dynDataList[i].uniqueId.ToString();
+                    }
+                    else if (dyn.dynDataList[i].type == "servo")
+                    {
+                        str = dyn.dynDataList[i].baseName + ": " + dyn.dynDataList[i].uniqueId.ToString();
+                    }
+
                     listBox1.Items.Add(str);
                 }
                 button1.Enabled = true;
             }
-            catch (Exception ex)
+            catch
             {
                 button1.Enabled = true;
-                Console.WriteLine(ex.Message);
+                Console.WriteLine("Error in Form1->button1_Click");
                 return;
             }
         }
@@ -70,6 +91,8 @@ namespace workWithDynamixel
         {
             if (!gotClick) return;
             dataGridView1.Visible = true;
+            panelForServo.Visible = false;
+            panelForPeriphery.Visible = false;
             if (listBox1.SelectedItem == null) return;
             storage.listBoxLastIndex = listBox1.SelectedIndex;
             string selected = listBox1.SelectedItem.ToString();
@@ -84,20 +107,50 @@ namespace workWithDynamixel
                 cancellationTokenSource = new CancellationTokenSource();
                 cancellationToken = cancellationTokenSource.Token;
             }
-            catch (Exception ex)
+            catch
             {
-                Console.WriteLine(ex.Message);
+                Console.WriteLine("Error in Form1->listBox1_SelectedIndexChanged");
             }
-            gotClass = store.getClass(getName[0].ToString(), gotId, this);
-            Thread read = new Thread(() => gotClass.getRegistersById(this, cancellationTokenSource.Token, pause, getName[0].ToString()));
+
+            if (getName[0].ToString().StartsWith("P_"))
+            {
+                className = getName[0].ToString().Substring(2);
+            }
+            else
+            {
+                className = "servo";
+            }
+
+            gotClass = store.getClass(className, gotId, this);
+            
+
+            if (className == "servo")
+            {
+                read = new Thread(() => gotClass.getDataForServo(this, cancellationTokenSource.Token, pause, cancellationTokenSource));
+                panelForServo.Visible = true;
+                panelForServo.Left = 753;
+                panelForServo.Top = 12;
+                modelName.Text = dyn.dynDataList[listBox1.SelectedIndex].baseName;
+            }
+            else
+            {
+                read = new Thread(() => gotClass.getRegistersById(this, cancellationTokenSource.Token, pause, className, cancellationTokenSource));
+                panelForPeriphery.Visible = true;
+            }
+                       
             lastThread = read;
+            if(dyn.getReg(64) == 1)
+            {
+                torque.Checked = true;
+                changeTorque = 1;
+            }
+            if(dyn.getReg(65) == 1)
+            {
+                LED.Checked = true;
+                changeLed = 1;
+            }
             read.Start();
-            panel1.Visible = true;
-            testPanel.Visible = true;
-            panel2.Visible = true;
             gotClick = false;
-            pictureBox1.Visible = true;
-            panel3.Visible = true;
         }
 
         private void Form1_FormClosing(object sender, FormClosingEventArgs e)
@@ -176,8 +229,14 @@ namespace workWithDynamixel
 
         private void dataGridView1_CellClick(object sender, DataGridViewCellEventArgs e)
         {
-            regToWrite.Text = dataGridView1.Rows[e.RowIndex].Cells[0].Value.ToString();
-
+            try
+            {
+                regToWrite.Text = dataGridView1.Rows[e.RowIndex].Cells[0].Value.ToString();
+            }
+            catch
+            {
+                Console.WriteLine("Error in Form1->dataGridView1_CellClick");
+            }
         }
 
         private void listBox1_MouseDown(object sender, MouseEventArgs e)
@@ -198,9 +257,106 @@ namespace workWithDynamixel
             {
                 gotClass.createArduinoFile();
             }
-            catch (Exception ex)
+            catch
             {
-                Console.WriteLine(ex.Message.ToString());
+                Console.WriteLine("Error in Form1->button5_Click");
+            }
+        }
+
+        private void textBox1_TextChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void pictureBox1_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void button6_Click(object sender, EventArgs e)
+        {
+            pause.Reset();
+            Thread.Sleep(200);
+            dyn.rebootItem();
+            Thread.Sleep(200);
+            pause.Set();
+        }
+
+        private void button7_Click(object sender, EventArgs e)
+        {
+            if (!isDisconnected)
+            {
+                cancellationTokenSource.Cancel();
+                Thread.Sleep(200);
+                cancellationTokenSource = new CancellationTokenSource();
+                cancellationToken = cancellationTokenSource.Token;
+                dyn.closeCurrentPort();
+                button7.Text = "Reconnect";
+                isDisconnected = true;
+            }
+            else
+            {
+                dyn.reconnectToCurrentPort();
+                if (className == "servo")
+                {
+                    read = new Thread(() => gotClass.getDataForServo(this, cancellationTokenSource.Token, pause, cancellationTokenSource));
+                    panelForServo.Visible = true;
+                    panelForServo.Left = 753;
+                    panelForServo.Top = 12;
+                    modelName.Text = dyn.dynDataList[listBox1.SelectedIndex].baseName;
+                }
+                else
+                {
+                    read = new Thread(() => gotClass.getRegistersById(this, cancellationTokenSource.Token, pause, className, cancellationTokenSource));
+                    panelForPeriphery.Visible = true;
+                }
+
+                lastThread = read;
+                read.Start();
+                button7.Text = "Disconnect";
+                isDisconnected = false;
+            }
+        }
+
+        private void torque_CheckedChanged(object sender, EventArgs e)
+        {
+            if (changeTorque == 0)
+            {
+                storage.regsToWriteWhileReading.Add(new regs(64, 1, 1));
+                changeTorque = 1;
+            }
+            else
+            {
+                storage.regsToWriteWhileReading.Add(new regs(64, 1, 0));
+                changeTorque = 0;
+            }
+        }
+        
+        private void LED_CheckedChanged(object sender, EventArgs e)
+        {
+            if (changeLed == 0)
+            {
+                storage.regsToWriteWhileReading.Add(new regs(65, 1, 1));
+                changeLed = 1;
+            }
+            else
+            {
+                storage.regsToWriteWhileReading.Add(new regs(65, 1, 0));
+                changeLed = 0;
+            }
+        }
+        int test = 1;
+        private void button8_Click(object sender, EventArgs e)
+        {
+            if(test == 1)
+            {
+                storage.regsToWriteWhileReading.Add(new regs(116, 4, 3100));
+                test = 0;
+            }
+            else
+            {
+                storage.regsToWriteWhileReading.Add(new regs(116, 4, 2047));
+                test = 1;
             }
         }
     }
