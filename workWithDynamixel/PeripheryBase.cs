@@ -52,10 +52,11 @@ namespace workWithDynamixel
         {
             int zeroRegdata = dyn.getZeroRegData();
             List<dataForRead> data = storage.fillServoData(zeroRegdata);
+            storage.currentData = data;
             int ticks = storage.getTicks(zeroRegdata);
             var structData = new dataStruct { servoData = data, type = "servo" };
             gotData = dyn.getReg(structData);
-            dyn.setGroupSyncReadWrite(zeroRegdata);          
+            dyn.setGroupSyncReadWrite(zeroRegdata);
             if (firstDraw)
             {
                 storage.firstDrawOfGrid(form, gotData, data);
@@ -65,25 +66,29 @@ namespace workWithDynamixel
             {
                 if (pause.WaitOne())
                 {
-                    //gotData = dyn.getReg(structData);
+                    gotData = dyn.getReg(structData);
 
-                    if (storage.usedProtocol == 1)
+                    /*if (storage.usedProtocol == 1 || zeroRegdata == 1061)
                     {
                         gotData = dyn.getReg(structData);
                     }
                     else
                     {
                         gotData = dyn.startGroupSyncReadWrite();
+                    }*/
+                    if(gotData.Count > 0)
+                    {
+                        storage.drawByData(form, gotData, data, ticks);
+                        if (Int32.Parse(gotData[0].ToString()) == 0)
+                        {
+                            Console.WriteLine(gotData[0]);
+                            source.Cancel();
+                            MessageBox.Show("Device is disconnected. Stopping Thread");//Переделать на анимацию какую-то
+                        }
                     }
-                    storage.drawByData(form, gotData, data, ticks);
                     lock (locker)
                     {
                         Monitor.Pulse(locker);
-                    }
-                    if (dyn.getZeroRegData() == 0)
-                    {
-                        source.Cancel();
-                        MessageBox.Show("Device is disconnected. Stopping Thread");//Переделать на анимацию какую-то
                     }
                 }
             }

@@ -62,6 +62,9 @@
             this.label12 = new System.Windows.Forms.Label();
             this.panelForPeriphery = new System.Windows.Forms.Panel();
             this.panelForServo = new System.Windows.Forms.Panel();
+            this.panel5 = new System.Windows.Forms.Panel();
+            this.panel6 = new System.Windows.Forms.Panel();
+            this.label13 = new System.Windows.Forms.Label();
             this.LED = new System.Windows.Forms.CheckBox();
             this.torque = new System.Windows.Forms.CheckBox();
             this.comboBox2 = new System.Windows.Forms.ComboBox();
@@ -70,6 +73,7 @@
             this.modelName = new System.Windows.Forms.Label();
             this.button7 = new System.Windows.Forms.Button();
             this.button8 = new System.Windows.Forms.Button();
+            this.dataGridView2 = new System.Windows.Forms.DataGridView();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
             this.panel1.SuspendLayout();
             this.testPanel.SuspendLayout();
@@ -78,7 +82,10 @@
             this.panel3.SuspendLayout();
             this.panelForPeriphery.SuspendLayout();
             this.panelForServo.SuspendLayout();
+            this.panel5.SuspendLayout();
+            this.panel6.SuspendLayout();
             this.panel4.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.dataGridView2)).BeginInit();
             this.SuspendLayout();
             // 
             // button1
@@ -396,6 +403,7 @@
             // 
             // panelForServo
             // 
+            this.panelForServo.Controls.Add(this.panel5);
             this.panelForServo.Controls.Add(this.LED);
             this.panelForServo.Controls.Add(this.torque);
             this.panelForServo.Controls.Add(this.comboBox2);
@@ -406,6 +414,35 @@
             this.panelForServo.Size = new System.Drawing.Size(281, 528);
             this.panelForServo.TabIndex = 21;
             this.panelForServo.Visible = false;
+            // 
+            // panel5
+            // 
+            this.panel5.Controls.Add(this.dataGridView2);
+            this.panel5.Controls.Add(this.panel6);
+            this.panel5.Location = new System.Drawing.Point(15, 127);
+            this.panel5.Name = "panel5";
+            this.panel5.Size = new System.Drawing.Size(258, 164);
+            this.panel5.TabIndex = 5;
+            // 
+            // panel6
+            // 
+            this.panel6.BackColor = System.Drawing.SystemColors.Highlight;
+            this.panel6.Controls.Add(this.label13);
+            this.panel6.Location = new System.Drawing.Point(3, 8);
+            this.panel6.Name = "panel6";
+            this.panel6.Size = new System.Drawing.Size(252, 30);
+            this.panel6.TabIndex = 0;
+            // 
+            // label13
+            // 
+            this.label13.AutoSize = true;
+            this.label13.Font = new System.Drawing.Font("Microsoft Sans Serif", 14F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.label13.ForeColor = System.Drawing.SystemColors.Control;
+            this.label13.Location = new System.Drawing.Point(83, 2);
+            this.label13.Name = "label13";
+            this.label13.Size = new System.Drawing.Size(70, 24);
+            this.label13.TabIndex = 0;
+            this.label13.Text = "label13";
             // 
             // LED
             // 
@@ -497,6 +534,14 @@
             this.button8.UseVisualStyleBackColor = true;
             this.button8.Click += new System.EventHandler(this.button8_Click);
             // 
+            // dataGridView2
+            // 
+            this.dataGridView2.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.dataGridView2.Location = new System.Drawing.Point(3, 44);
+            this.dataGridView2.Name = "dataGridView2";
+            this.dataGridView2.Size = new System.Drawing.Size(252, 113);
+            this.dataGridView2.TabIndex = 1;
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -538,8 +583,12 @@
             this.panelForPeriphery.ResumeLayout(false);
             this.panelForServo.ResumeLayout(false);
             this.panelForServo.PerformLayout();
+            this.panel5.ResumeLayout(false);
+            this.panel6.ResumeLayout(false);
+            this.panel6.PerformLayout();
             this.panel4.ResumeLayout(false);
             this.panel4.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.dataGridView2)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -588,6 +637,10 @@
         private System.Windows.Forms.CheckBox torque;
         private System.Windows.Forms.CheckBox LED;
         private System.Windows.Forms.Button button8;
+        private System.Windows.Forms.Panel panel5;
+        private System.Windows.Forms.Panel panel6;
+        private System.Windows.Forms.Label label13;
+        private System.Windows.Forms.DataGridView dataGridView2;
     }
 }
 

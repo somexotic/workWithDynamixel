@@ -3,6 +3,7 @@ using System.Windows.Forms;
 using System.IO.Ports;
 using System.Threading;
 using System.Drawing;
+using System.Collections.Generic;
 
 namespace workWithDynamixel
 {
@@ -21,6 +22,7 @@ namespace workWithDynamixel
         protected Thread read = null;
         public static int changeLed = 0;
         public static int changeTorque = 0;
+        public Panel lastCreatedPanel = null;
 
         public Form1()
         {
@@ -103,7 +105,7 @@ namespace workWithDynamixel
             try
             {
                 cancellationTokenSource.Cancel();
-                Thread.Sleep(200);
+                Thread.Sleep(300);
                 cancellationTokenSource = new CancellationTokenSource();
                 cancellationToken = cancellationTokenSource.Token;
             }
@@ -231,12 +233,90 @@ namespace workWithDynamixel
         {
             try
             {
-                regToWrite.Text = dataGridView1.Rows[e.RowIndex].Cells[0].Value.ToString();
+                if(className == "servo")
+                {
+                    if(lastCreatedPanel != null)
+                    {
+                        panelForServo.Controls.Remove(lastCreatedPanel);
+                        lastCreatedPanel.Dispose();
+                    } 
+                    Panel panel = newPanel(storage.currentData[e.RowIndex].type, dataGridView1.Rows[e.RowIndex].Cells[1].Value.ToString());
+                    panelForServo.Controls.Add(panel);
+                    lastCreatedPanel = panel;
+                }
+                else
+                {
+                    regToWrite.Text = dataGridView1.Rows[e.RowIndex].Cells[0].Value.ToString();
+                }
             }
             catch
             {
                 Console.WriteLine("Error in Form1->dataGridView1_CellClick");
             }
+        }
+
+        public Panel newPanel(string type, string labelText)
+        {
+            Panel panel = new Panel();
+            panel.Size = new Size(258, 196);
+            panel.BorderStyle = BorderStyle.None;
+            panel.Location = new System.Drawing.Point(14, 324);
+
+            Panel panelForText = new Panel();
+            panelForText.BackColor = System.Drawing.SystemColors.Highlight;
+            panelForText.Location = new System.Drawing.Point(3, 8);
+            panelForText.Size = new System.Drawing.Size(252, 30);
+
+            Label label = new Label();
+            label.Text = labelText;
+            label.Font = new System.Drawing.Font("Microsoft Sans Serif", 14F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            label.ForeColor = System.Drawing.SystemColors.Control;
+            int textOffset = 0;
+            if(labelText.Length > 2)
+            {
+                textOffset = (int)((double)labelText.Length * 3);
+            }
+            label.Location = new System.Drawing.Point(102 - textOffset, 2);
+            label.AutoSize = true;
+
+            panelForText.Controls.Add(label);
+            panel.Controls.Add(panelForText);
+
+            switch (type)
+            {
+                case "list":
+                    DataGridView grid = new DataGridView();
+                    grid.Location = new System.Drawing.Point(3, 44);
+                    grid.Size = new System.Drawing.Size(252, 113);
+                    grid.ColumnCount = 2;
+                    grid.Columns[0].Name = "Decimal";
+                    grid.Columns[0].Width = 80;
+                    grid.Columns[1].Name = "Actual";
+                    grid.Columns[1].Width = 150;
+                    grid.ReadOnly = true;
+                    grid.AllowUserToAddRows = false;
+                    grid.AllowUserToDeleteRows = false;
+                    grid.RowHeadersVisible = false;
+                    grid.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
+                    grid.CellClick += new System.Windows.Forms.DataGridViewCellEventHandler(cellDynamixcClick);
+                    grid.AllowUserToResizeColumns = false;
+                    grid.AllowUserToResizeRows = false;
+                    Dictionary<int, string> dictToWrite = storage.getDataForList(labelText);
+                    foreach (var pair in dictToWrite)
+                    {
+                        grid.Rows.Add(pair.Key, pair.Value);
+                    }
+                    panel.Controls.Add(grid);
+                    break;
+                default:
+                    break;
+            }
+            return panel;
+        }
+
+        private void cellDynamixcClick(object sender, DataGridViewCellEventArgs e)
+        {
+            Console.WriteLine(e.RowIndex.ToString());
         }
 
         private void listBox1_MouseDown(object sender, MouseEventArgs e)
@@ -345,10 +425,14 @@ namespace workWithDynamixel
                 changeLed = 0;
             }
         }
-        int test = 1;
+
         private void button8_Click(object sender, EventArgs e)
         {
-            if(test == 1)
+            //dyn.writeReg(storage.lastId, 7, 2, 1);
+            //storage.regsToWriteWhileReading.Add(new regs(7, 1, 2));
+            storage.regsToWriteWhileReading.Add(new regs(8, 1, 1));
+            //dyn.writeReg(2, 8, 1, 1);
+            /*if(test == 1)
             {
                 storage.regsToWriteWhileReading.Add(new regs(116, 4, 3100));
                 test = 0;
@@ -357,7 +441,7 @@ namespace workWithDynamixel
             {
                 storage.regsToWriteWhileReading.Add(new regs(116, 4, 2047));
                 test = 1;
-            }
+            }*/
         }
     }
 }

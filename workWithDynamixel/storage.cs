@@ -52,12 +52,13 @@ namespace workWithDynamixel
 
     internal class dataForRead
     {
-        public dataForRead(string registerName, int regToRead, int lengOfReg, bool readOnly)
+        public dataForRead(string registerName, int regToRead, int lengOfReg, bool readOnly, string type)
         {
             this.registerName = registerName;
             this.regToRead = regToRead;
             this.lengOfReg = lengOfReg;
             this.readOnly = readOnly;
+            this.type = type;   
         }
 
         public string registerName { get; set; }
@@ -324,6 +325,7 @@ namespace workWithDynamixel
                     return "";
             }
         }
+        public string type { get; set; }
     }
 
     internal class groupReadWrite
@@ -350,6 +352,9 @@ namespace workWithDynamixel
         public static int groupRead = -1;
         public static List<groupReadWrite> listGroupSyncRead = new List<groupReadWrite>();
         public static List<regs> regsToWriteWhileReading = new List<regs>();
+        public static bool endGroupSyncRead = false;
+        public static List<dataForRead> currentData = null;
+        public static Dictionary<int, int> usedId = new Dictionary<int, int>();
         public PeripheryBase getClass(string type, int id, Form1 form)
         {
             switch (type)
@@ -554,6 +559,26 @@ namespace workWithDynamixel
             return list;
         }
 
+        public static Dictionary<int, string> getDataForList(string type)
+        {
+            Dictionary<int, string> dict = new Dictionary<int, string>();
+            switch (type)
+            {
+                case "ID":
+                    string str = "";
+                    for(int i = 0; i < 253; i++)
+                    {
+                        if (usedId.ContainsKey(i)) continue;
+                        else
+                        {
+                            str = "ID " + i;
+                            dict.Add(i, str);
+                        }
+                    }
+                    break;
+            }
+            return dict;
+        }
         public static List<groupReadWrite> fillSyncReadGroup(int modelNumber)
         {
             List<groupReadWrite> list = new List<groupReadWrite>();
@@ -573,110 +598,58 @@ namespace workWithDynamixel
             switch (modelNumber)
             {
                 case 1060://XL_430_W_250
-                    data.Add(new dataForRead("Model Number", 0, 2, true));
-                    data.Add(new dataForRead("Model Information", 2, 4, true));
-                    data.Add(new dataForRead("Firmware version", 6, 1, true));
-                    data.Add(new dataForRead("ID", 7, 1, false));
-                    data.Add(new dataForRead("Baudrate", 8, 1, false));
-                    data.Add(new dataForRead("Return delay time", 9, 1, false));
-                    data.Add(new dataForRead("Drive Mode", 10, 1, false));
-                    data.Add(new dataForRead("Operation Mode", 11, 1, false));
-                    data.Add(new dataForRead("Shadow id", 12, 1, false));
-                    data.Add(new dataForRead("Protocol", 13, 1, false));
-                    data.Add(new dataForRead("Homing offset", 20, 4, true));
-                    data.Add(new dataForRead("Moving Threshold", 24, 4, true));
-                    data.Add(new dataForRead("Temperature Limit", 31, 1, false));
-                    data.Add(new dataForRead("Max Voltage Limit", 32, 2, false));
-                    data.Add(new dataForRead("Min Voltage Limit", 34, 2, false));
-                    data.Add(new dataForRead("PWM Limit", 36, 2, false));
-                    data.Add(new dataForRead("Velocity Limit", 44, 4, false));
-                    data.Add(new dataForRead("Max Position Limit", 48, 4, false));
-                    data.Add(new dataForRead("Min Position Limit", 52, 4, false));
-                    data.Add(new dataForRead("Startup Configuration", 60, 1, false));
-                    data.Add(new dataForRead("Shutdown", 63, 1, false));
-                    data.Add(new dataForRead("Torque Enable", 64, 1, false));
-                    data.Add(new dataForRead("LED", 65, 1, false));
-                    data.Add(new dataForRead("Status Return Level", 68, 1, false));
-                    data.Add(new dataForRead("Registered Instruction", 69, 1, true));
-                    data.Add(new dataForRead("Hardware Error Status", 70, 1, true));
-                    data.Add(new dataForRead("Velocity I Gain", 76, 2, false));
-                    data.Add(new dataForRead("Velocity P Gain", 78, 2, false));
-                    data.Add(new dataForRead("Position D Gain", 80, 2, false));
-                    data.Add(new dataForRead("Position I Gain", 82, 2, false));
-                    data.Add(new dataForRead("Position D Gain", 84, 2, false));
-                    data.Add(new dataForRead("Feedforward 2nd Gain", 88, 2, false));
-                    data.Add(new dataForRead("Feedforward 1st Gain", 90, 2, false));
-                    data.Add(new dataForRead("Bus Watchdog", 98, 1, false));
-                    data.Add(new dataForRead("Goal PWM", 100, 2, false));
-                    data.Add(new dataForRead("Goal Velocity", 104, 4, false));
-                    data.Add(new dataForRead("Profile Acceleration", 108, 4, false));
-                    data.Add(new dataForRead("Profile Velocity", 112, 4, false));
-                    data.Add(new dataForRead("Goal Position", 116, 4, false));
-                    data.Add(new dataForRead("Realtime Tick", 120, 2, true));
-                    data.Add(new dataForRead("Moving", 122, 1, true));
-                    data.Add(new dataForRead("Moving Status", 123, 1, true));
-                    data.Add(new dataForRead("Present PWM", 124, 2, true));
-                    data.Add(new dataForRead("Present Load", 126, 2, true));
-                    data.Add(new dataForRead("Present Velocity", 128, 4, true));
-                    data.Add(new dataForRead("Present Position", 132, 4, true));
-                    data.Add(new dataForRead("Velocity Trajectory", 136, 4, true));
-                    data.Add(new dataForRead("Position Trajectory", 140, 4, true));
-                    data.Add(new dataForRead("Present Input Voltage", 144, 2, true));
-                    data.Add(new dataForRead("Present Temperature", 146, 1, true));
-                    data.Add(new dataForRead("Backup Ready", 147, 1, true));
-                    break;
                 case 1061://AR_S430_01
-                    data.Add(new dataForRead("Model Number", 0, 2, true));
-                    data.Add(new dataForRead("Model Information", 2, 4, true));
-                    data.Add(new dataForRead("Firmware version", 6, 1, true));
-                    data.Add(new dataForRead("ID", 7, 1, false));
-                    data.Add(new dataForRead("Baudrate", 8, 1, false));
-                    data.Add(new dataForRead("Return delay time", 9, 1, false));
-                    data.Add(new dataForRead("Drive Mode", 10, 1, false));
-                    data.Add(new dataForRead("Operation Mode", 11, 1, false));
-                    data.Add(new dataForRead("Shadow id", 12, 1, false));
-                    data.Add(new dataForRead("Protocol", 13, 1, false));
-                    data.Add(new dataForRead("Homing offset", 20, 4, true));
-                    data.Add(new dataForRead("Moving Threshold", 24, 4, true));
-                    data.Add(new dataForRead("Temperature Limit", 31, 1, false));
-                    data.Add(new dataForRead("Max Voltage Limit", 32, 2, false));
-                    data.Add(new dataForRead("Min Voltage Limit", 34, 2, false));
-                    data.Add(new dataForRead("PWM Limit", 36, 2, false));
-                    data.Add(new dataForRead("Velocity Limit", 44, 4, false));
-                    data.Add(new dataForRead("Max Position Limit", 48, 4, false));
-                    data.Add(new dataForRead("Min Position Limit", 52, 4, false));
-                    data.Add(new dataForRead("Startup Configuration", 60, 1, false));
-                    data.Add(new dataForRead("Shutdown", 63, 1, false));
-                    data.Add(new dataForRead("Torque Enable", 64, 1, false));
-                    data.Add(new dataForRead("LED", 65, 1, false));
-                    data.Add(new dataForRead("Status Return Level", 68, 1, false));
-                    data.Add(new dataForRead("Registered Instruction", 69, 1, true));
-                    data.Add(new dataForRead("Hardware Error Status", 70, 1, true));
-                    data.Add(new dataForRead("Velocity I Gain", 76, 2, false));
-                    data.Add(new dataForRead("Velocity P Gain", 78, 2, false));
-                    data.Add(new dataForRead("Position D Gain", 80, 2, false));
-                    data.Add(new dataForRead("Position I Gain", 82, 2, false));
-                    data.Add(new dataForRead("Position D Gain", 84, 2, false));
-                    data.Add(new dataForRead("Feedforward 2nd Gain", 88, 2, false));
-                    data.Add(new dataForRead("Feedforward 1st Gain", 90, 2, false));
-                    data.Add(new dataForRead("Bus Watchdog", 98, 1, false));
-                    data.Add(new dataForRead("Goal PWM", 100, 4, false));
-                    data.Add(new dataForRead("Goal Velocity", 104, 4, false));
-                    data.Add(new dataForRead("Profile Acceleration", 108, 4, false));
-                    data.Add(new dataForRead("Profile Velocity", 112, 4, false));
-                    data.Add(new dataForRead("Goal Position", 116, 4, false));
-                    data.Add(new dataForRead("Realtime Tick", 120, 2, true));
-                    data.Add(new dataForRead("Moving", 122, 1, true));
-                    data.Add(new dataForRead("Moving Status", 123, 1, true));
-                    data.Add(new dataForRead("Present PWM", 124, 4, true));
-                    data.Add(new dataForRead("Present Load", 126, 2, true));
-                    data.Add(new dataForRead("Present Velocity", 128, 4, true));
-                    data.Add(new dataForRead("Present Position", 132, 4, true));
-                    data.Add(new dataForRead("Velocity Trajectory", 136, 4, true));
-                    data.Add(new dataForRead("Position Trajectory", 140, 4, true));
-                    data.Add(new dataForRead("Present Input Voltage", 144, 2, true));
-                    data.Add(new dataForRead("Present Temperature", 146, 1, true));
-                    data.Add(new dataForRead("Backup Ready", 147, 1, true));
+                    data.Add(new dataForRead("Model Number", 0, 2, true, "any"));
+                    data.Add(new dataForRead("Model Information", 2, 4, true, "any"));
+                    data.Add(new dataForRead("Firmware version", 6, 1, true, "any"));
+                    data.Add(new dataForRead("ID", 7, 1, false, "list"));
+                    data.Add(new dataForRead("Baudrate", 8, 1, false, "any"));
+                    data.Add(new dataForRead("Return delay time", 9, 1, false, "any"));
+                    data.Add(new dataForRead("Drive Mode", 10, 1, false, "any"));
+                    data.Add(new dataForRead("Operation Mode", 11, 1, false, "any"));
+                    data.Add(new dataForRead("Shadow id", 12, 1, false, "any"));
+                    data.Add(new dataForRead("Protocol", 13, 1, false, "any"));
+                    data.Add(new dataForRead("Homing offset", 20, 4, true, "any"));
+                    data.Add(new dataForRead("Moving Threshold", 24, 4, true, "any"));
+                    data.Add(new dataForRead("Temperature Limit", 31, 1, false, "any"));
+                    data.Add(new dataForRead("Max Voltage Limit", 32, 2, false, "any"));
+                    data.Add(new dataForRead("Min Voltage Limit", 34, 2, false, "any"));
+                    data.Add(new dataForRead("PWM Limit", 36, 2, false, "any"));
+                    data.Add(new dataForRead("Velocity Limit", 44, 4, false, "any"));
+                    data.Add(new dataForRead("Max Position Limit", 48, 4, false, "any"));
+                    data.Add(new dataForRead("Min Position Limit", 52, 4, false, "any"));
+                    data.Add(new dataForRead("Startup Configuration", 60, 1, false, "any"));
+                    data.Add(new dataForRead("Shutdown", 63, 1, false, "any"));
+                    data.Add(new dataForRead("Torque Enable", 64, 1, false, "any"));
+                    data.Add(new dataForRead("LED", 65, 1, false, "any"));
+                    data.Add(new dataForRead("Status Return Level", 68, 1, false, "any"));
+                    data.Add(new dataForRead("Registered Instruction", 69, 1, true, "any"));
+                    data.Add(new dataForRead("Hardware Error Status", 70, 1, true, "any"));
+                    data.Add(new dataForRead("Velocity I Gain", 76, 2, false, "any"));
+                    data.Add(new dataForRead("Velocity P Gain", 78, 2, false, "any"));
+                    data.Add(new dataForRead("Position D Gain", 80, 2, false, "any"));
+                    data.Add(new dataForRead("Position I Gain", 82, 2, false, "any"));
+                    data.Add(new dataForRead("Position D Gain", 84, 2, false, "any"));
+                    data.Add(new dataForRead("Feedforward 2nd Gain", 88, 2, false, "any"));
+                    data.Add(new dataForRead("Feedforward 1st Gain", 90, 2, false, "any"));
+                    data.Add(new dataForRead("Bus Watchdog", 98, 1, false, "any"));
+                    data.Add(new dataForRead("Goal PWM", 100, 4, false, "any"));
+                    data.Add(new dataForRead("Goal Velocity", 104, 4, false, "any"));
+                    data.Add(new dataForRead("Profile Acceleration", 108, 4, false, "any"));
+                    data.Add(new dataForRead("Profile Velocity", 112, 4, false, "any"));
+                    data.Add(new dataForRead("Goal Position", 116, 4, false, "any"));
+                    data.Add(new dataForRead("Realtime Tick", 120, 2, true, "any"));
+                    data.Add(new dataForRead("Moving", 122, 1, true, "any"));
+                    data.Add(new dataForRead("Moving Status", 123, 1, true, "any"));
+                    data.Add(new dataForRead("Present PWM", 124, 4, true, "any"));
+                    data.Add(new dataForRead("Present Load", 126, 2, true, "any"));
+                    data.Add(new dataForRead("Present Velocity", 128, 4, true, "any"));
+                    data.Add(new dataForRead("Present Position", 132, 4, true, "any"));
+                    data.Add(new dataForRead("Velocity Trajectory", 136, 4, true, "any"));
+                    data.Add(new dataForRead("Position Trajectory", 140, 4, true, "any"));
+                    data.Add(new dataForRead("Present Input Voltage", 144, 2, true, "any"));
+                    data.Add(new dataForRead("Present Temperature", 146, 1, true, "any"));
+                    data.Add(new dataForRead("Backup Ready", 147, 1, true, "any"));
                     break;
             }
             return data;

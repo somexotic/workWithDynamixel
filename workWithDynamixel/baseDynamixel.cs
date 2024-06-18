@@ -46,6 +46,7 @@ namespace workWithDynamixel
                 dynamixel.closePort(storage.openedPort);
             }
             dynDataList.Clear();
+            storage.usedId.Clear();
             if (baudrate < 1) return;
             await Task.Run(() =>
             {
@@ -67,11 +68,13 @@ namespace workWithDynamixel
                             {
                                 int value = dynamixel.read1ByteTxRx(port_num, protocol, i, 3);
                                 dynDataList.Add(new dynData(baseId, value, "periphery", Enum.GetName(typeof(BaseReg), baseId)));
+                                storage.usedId.Add(value, value);
                             }
                             else if (baseId > 100)
                             {
                                 int value = dynamixel.read1ByteTxRx(port_num, protocol, i, 7);
                                 dynDataList.Add(new dynData(1, value, "servo", Enum.GetName(typeof(baseNameOfServo), baseId)));
+                                storage.usedId.Add(value, value);
                             }
                         }
                     }
@@ -87,9 +90,9 @@ namespace workWithDynamixel
                         dynamixel.closePort(port_num);
                     }
                 }
-                catch (Exception ex)
+                catch 
                 {
-                    Console.WriteLine(ex.Message);
+                    Console.WriteLine("Error in baseDynamixel->findDynamixel");
                 }
             });
         }
@@ -107,19 +110,29 @@ namespace workWithDynamixel
             dynamixel.closePort(storage.openedPort);
         }
 
-        public void checkIfNeedToWrite()
+        public void checkIfNeedToWrite(string type)
         {
             int port = -1;
-            for(int i = 0; i < storage.regsToWriteWhileReading.Count; i++)
+            if(type == "sync")
             {
-                port = dynamixel.groupSyncWrite(storage.openedPort, 2, (ushort)storage.regsToWriteWhileReading[i].reg, (ushort)storage.regsToWriteWhileReading[i].len);
-                dynamixel.groupSyncWriteAddParam(port, (byte)storage.lastId, (ushort)storage.regsToWriteWhileReading[i].val, (ushort)storage.regsToWriteWhileReading[i].len);
-                dynamixel.groupSyncWriteTxPacket(port);
-                dynamixel.groupSyncWriteClearParam(port);
+                for (int i = 0; i < storage.regsToWriteWhileReading.Count; i++)
+                {
+                    port = dynamixel.groupSyncWrite(storage.openedPort, 2, (ushort)storage.regsToWriteWhileReading[i].reg, (ushort)storage.regsToWriteWhileReading[i].len);
+                    dynamixel.groupSyncWriteAddParam(port, (byte)storage.lastId, (ushort)storage.regsToWriteWhileReading[i].val, (ushort)storage.regsToWriteWhileReading[i].len);
+                    dynamixel.groupSyncWriteTxPacket(port);
+                    dynamixel.groupSyncWriteClearParam(port);
+                }
+                storage.regsToWriteWhileReading.Clear();
             }
-            storage.regsToWriteWhileReading.Clear();
+            else
+            {
+                for (int i = 0; i < storage.regsToWriteWhileReading.Count; i++)
+                {
+                    writeReg(storage.lastId, storage.regsToWriteWhileReading[i].reg, storage.regsToWriteWhileReading[i].val, storage.regsToWriteWhileReading[i].len);
+                }
+                storage.regsToWriteWhileReading.Clear();
+            }
         }
-
 
         public void setGroupSyncReadWrite(int modelNumber)
         {
@@ -140,24 +153,34 @@ namespace workWithDynamixel
         public Dictionary<int, object> startGroupSyncReadWrite()
         {
             regData.Clear();
-            for (int i = 0; i < storage.listGroupSyncRead.Count; i++)
+            try
             {
-                dynamixel.groupSyncReadTxRxPacket(storage.listGroupSyncRead[i].groupNumber);
-                switch (storage.listGroupSyncRead[i].registerLength)
+                storage.endGroupSyncRead = true;
+                for (int i = 0; i < storage.listGroupSyncRead.Count; i++)
                 {
-                    case 1:
-                        regData.Add(storage.listGroupSyncRead[i].register, (byte)dynamixel.groupSyncReadGetData(storage.listGroupSyncRead[i].groupNumber, (byte)storage.lastId, (ushort)storage.listGroupSyncRead[i].register, (ushort)storage.listGroupSyncRead[i].registerLength));
-                        break;
-                    case 2:
-                        regData.Add(storage.listGroupSyncRead[i].register, (ushort)dynamixel.groupSyncReadGetData(storage.listGroupSyncRead[i].groupNumber, (byte)storage.lastId, (ushort)storage.listGroupSyncRead[i].register, (ushort)storage.listGroupSyncRead[i].registerLength));
-                        break;
-                    case 4:
-                        regData.Add(storage.listGroupSyncRead[i].register, dynamixel.groupSyncReadGetData(storage.listGroupSyncRead[i].groupNumber, (byte)storage.lastId, (ushort)storage.listGroupSyncRead[i].register, (ushort)storage.listGroupSyncRead[i].registerLength));
-                        break;
-                    default:
-                        break;
+                    dynamixel.groupSyncReadTxRxPacket(storage.listGroupSyncRead[i].groupNumber);
+                    switch (storage.listGroupSyncRead[i].registerLength)
+                    {
+                        case 1:
+                            regData.Add(storage.listGroupSyncRead[i].register, (byte)dynamixel.groupSyncReadGetData(storage.listGroupSyncRead[i].groupNumber, (byte)storage.lastId, (ushort)storage.listGroupSyncRead[i].register, (ushort)storage.listGroupSyncRead[i].registerLength));
+                            break;
+                        case 2:
+                            regData.Add(storage.listGroupSyncRead[i].register, (ushort)dynamixel.groupSyncReadGetData(storage.listGroupSyncRead[i].groupNumber, (byte)storage.lastId, (ushort)storage.listGroupSyncRead[i].register, (ushort)storage.listGroupSyncRead[i].registerLength));
+                            break;
+                        case 4:
+                            regData.Add(storage.listGroupSyncRead[i].register, dynamixel.groupSyncReadGetData(storage.listGroupSyncRead[i].groupNumber, (byte)storage.lastId, (ushort)storage.listGroupSyncRead[i].register, (ushort)storage.listGroupSyncRead[i].registerLength));
+                            break;
+                        default:
+                            break;
+                    }
+                    checkIfNeedToWrite("sync");
                 }
-                checkIfNeedToWrite();
+                storage.endGroupSyncRead = false;
+            }
+            catch
+            {
+                Console.WriteLine("Error in baseDynamixel->startGroupSyncReadWrite");
+                return null;
             }
             return regData;
         }
@@ -171,17 +194,11 @@ namespace workWithDynamixel
             int group = dynamixel.groupSyncRead(storage.openedPort, 2, (ushort)reg, (ushort)len);
             return group;
         }
-        public static int getNewSyncWriteGroup(int reg, int len)
-        {
-            int group = dynamixel.groupSyncWrite(storage.openedPort, 2, (ushort)reg, (ushort)len);
-            return group;
-        }
 
         public void test()
         {
             if (!testO)
             {
-
                 port = dynamixel.groupSyncRead(storage.openedPort, 2, 120, 2);
                 port2 = dynamixel.groupSyncRead(storage.openedPort, 2, 31, 1);
                 dynamixel.groupSyncReadAddParam(port, 1);
@@ -256,6 +273,7 @@ namespace workWithDynamixel
                                 regData.Add(gotStruct.regToRead[i], dynamixel.read4ByteTxRx(storage.openedPort, storage.usedProtocol, (byte)storage.lastId, (ushort)gotStruct.regToRead[i]));
                                 break;
                         }
+                        checkIfNeedToWrite("regByReg");
                     }
                 }
                 else if (gotStruct.type == "servo")
@@ -274,6 +292,7 @@ namespace workWithDynamixel
                                 regData.Add(gotStruct.servoData[i].regToRead, dynamixel.read4ByteTxRx(storage.openedPort, storage.usedProtocol, (byte)storage.lastId, (ushort)gotStruct.servoData[i].regToRead));
                                 break;
                         }
+                        checkIfNeedToWrite("regByReg");
                     }
                 }
                 return regData;
